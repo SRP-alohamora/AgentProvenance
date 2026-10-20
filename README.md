@@ -180,5 +180,6 @@ Every provenance event combines the non-instructional envelope, the 5-W layman s
 ## 7. Project Documentation Index
 
 - **[Detailed PRD & Architecture Blueprint](agent_provenance_requirements.md)**: Complete functional requirements, platform-agnostic meta-router, market synthesis, and EC 9 sovereignty pillars.
+- **[Functional Spec & Architectural Decision Matrix](agent_provenance_functional_spec.md)**: Zero-cost optimization, deterministic vs. LLM layer analysis, and layer-by-layer reference architecture walkthrough.
 - **[UX Deep Dive & Market Benchmark](agent_provenance_ux_deep_dive.md)**: Analysis of 9 industry tools, 5 user personas, Tri-Pane visual workspace, and terminal CLI.
 - **[Observability Benchmark & Pydantic v2 Schema](agent_provenance_observability_and_pydantic_spec.md)**: Analysis of Langfuse, LangSmith, Phoenix, Datadog LLM, and Honeycomb/OTel with production-ready Pydantic models.
