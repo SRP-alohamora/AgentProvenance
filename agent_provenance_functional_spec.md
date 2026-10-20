@@ -240,23 +240,141 @@ Step 7: Agent #2 generates 'audit_summary.csv' and updates Agent State in Storag
 
 ---
 
-## 6. Zero-Cost Deployment Architecture
+## 6. Dual-Mode Deployment Architecture: Local-First ($0-Cost) & Cloud-Native (Scale & Sovereignty)
 
-The entire AgentProvenance engine can be deployed with **zero infrastructure cost**:
+AgentProvenance is engineered with an **isomorphic architecture**: the exact same application code, Pydantic schemas, and W3C PROV-O logic run seamlessly in both **Local Developer Mode** ($0 cost) and **Cloud-Native Enterprise Mode** (Kubernetes, distributed streaming, and hardware-attested sovereign enclaves).
 
+```mermaid
+graph TD
+    subgraph DeploymentModes["Dual Deployment Modes"]
+        subgraph LocalMode["Mode 1: Local-First ($0 Cost)"]
+            DevLaptop["Developer Laptop / Edge / Air-Gapped"]
+            SingleFastAPI["Single FastAPI Process (<350MB RAM)"]
+            EmbeddedDuckDB["Embedded DuckDB & In-Memory Graph"]
+            LocalOllama["Local SLM (Ollama) [Optional]"]
+        end
+
+        subgraph CloudMode["Mode 2: Cloud-Native & Sovereign Cloud"]
+            K8sCluster["Kubernetes Cluster (EKS / GKE / OVHcloud SecNumCloud)"]
+            IngestPods["FastAPI Ingest Pods (HPA Autoscaling)"]
+            BufferQueue["Message Broker (Redis Streams / Kafka)"]
+            CloudDB["PostgreSQL / ClickHouse (Distributed Lineage)"]
+            ObjectStore["S3 / GCS / MinIO (Parquet & Artifact Vault)"]
+            ConfidentialEnclave["AMD SEV-SNP / Intel TDX (Encrypted RAM)"]
+        end
+    end
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                   AGENTPROVENANCE ZERO-COST EMBEDDED FOOTPRINT                         │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ • Runtime:        Python 3.11+ / FastAPI (Async ASGI)                                  │
-│ • Database:       Embedded DuckDB (In-process, zero server management, $0/mo)          │
-│ • Graph Index:    In-memory Kùzu / NetworkX (Microsecond causal DAG traversal, $0/mo)  │
-│ • Scrubbing:      Microsoft Presidio (Local Spacy NER, $0/mo)                          │
-│ • Policy Engine:  Open Policy Agent (Local WASM/Python engine, $0/mo)                  │
-│ • Cryptography:   Python `hashlib` + Ed25519 (Zero gas fees, $0/mo)                    │
-│ • Total Memory:   < 350 MB RAM                                                         │
-│ • Total Cloud Bill: $0.00 / month                                                      │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+
+---
+
+### 6.1 Architectural Comparison: Local Mode vs. Cloud-Native Mode
+
+| Architectural Layer | Mode 1: Local-First ($0 Cost) | Mode 2: Cloud-Native & Sovereign Cloud | Seamless Transition Mechanism |
+| :--- | :--- | :--- | :--- |
+| **Compute & Runtime** | Single Python process / Docker container (<350MB RAM) | Multi-replica Kubernetes Deployment with Horizontal Pod Autoscaler (HPA) | Containerized via unified multi-stage `Dockerfile` with zero code changes. |
+| **API Ingestion Gateway** | Direct async in-memory queue inside FastAPI | Ingress Controller (NGINX / Envoy) + Redis Streams / Kafka buffer | `IngestGateway` uses an abstract `QueueAdapter` (swaps `MemoryQueue` for `RedisQueue`). |
+| **Causal Graph & Lineage Engine** | Embedded DuckDB + In-Memory Kùzu / NetworkX | ClickHouse / PostgreSQL (TimescaleDB / Apache AGE) + DuckDB over S3 Parquet | Shared SQL/Relational abstraction via SQLModel / SQLAlchemy repository pattern. |
+| **Artifact & Payload Storage** | Local filesystem (`~/.agentprovenance/artifacts/`) | S3 / Google Cloud Storage / MinIO with Server-Side Encryption (KMS) | `BlobStoreAdapter` switches between `LocalFileSystemDriver` and `S3Driver`. |
+| **PII & Security Scrubbing** | In-process Microsoft Presidio (Local Spacy NER) + Regex | Distributed Presidio Pods or Celery/Ray worker pool | Parallelized async worker queue for high-throughput enterprise fleets. |
+| **Policy Engine** | Embedded OPA WASM runtime in-process | Sidecar OPA daemon or centralized enterprise OPA cluster | Standard declarative Rego rules (`.rego`) evaluated identically in both modes. |
+| **Cryptographic Attestation** | Local Ed25519 keypair via `cryptography` library | Cloud HSM / Sovereign HSM (AWS CloudHSM, Securosys PKCS#11) + Post-Quantum PQC | `AttestationSigner` implements PKCS#11 and Cloud KMS interfaces. |
+| **Digital Sovereignty & Enclaves** | Local air-gapped machine (100% on-prem) | Confidential VMs (AMD SEV-SNP / AWS Nitro Enclaves / OVH SecNumCloud) | Memory encryption is hardware-enforced at the hypervisor level. |
+| **Operational Cost** | **$0.00 / month** | Elastic cloud consumption (pay-for-use or reserved sovereign capacity) | User chooses deployment mode via `provenance_config.yaml` (`mode: local` vs `mode: cloud`). |
+
+---
+
+### 6.2 Cloud-Native Architecture Blueprint
+
+```mermaid
+flowchart TD
+    subgraph ClientLayer["Multi-Agent Fleets & Services"]
+        Agents["Agent Fleets (LangGraph, Semantic-Kernel, CrewAI)"]
+        MCPServers["Dynamic MCP Servers"]
+    end
+
+    subgraph CloudIngress["Sovereign Cloud Ingress & Load Balancing"]
+        Ingress["Envoy / NGINX Ingress Controller"]
+        CertManager["Cert-Manager (mTLS / TLS 1.3)"]
+    end
+
+    subgraph K8sCluster["Confidential Kubernetes Cluster (AMD SEV-SNP / Intel TDX)"]
+        subgraph IngestService["Stateless Ingestion Microservice"]
+            Pod1["Ingest Pod 1"]
+            Pod2["Ingest Pod 2"]
+            PodN["Ingest Pod N (HPA)"]
+        end
+
+        subgraph BufferBroker["High-Throughput Ingestion Buffer"]
+            RedisStreams["Redis Cluster / Apache Kafka (Sovereign VPC)"]
+        end
+
+        subgraph WorkerService["Asynchronous Lineage & Policy Workers"]
+            Worker1["Graph Builder & Merkle Signer"]
+            Worker2["Presidio PII & Taint Analyzer"]
+            Worker3["Platform Router & Dispatcher"]
+        end
+    end
+
+    subgraph SovereignStorage["Sovereign Multi-Tier Storage Plane"]
+        PostgresDB["PostgreSQL / TimescaleDB / ClickHouse (Causal Events & Runs)"]
+        BlobVault["S3 / GCS / MinIO (Encrypted Artifacts & Parquet Lake)"]
+        SovereignHSM["Cloud / Sovereign HSM (PKCS#11 Master Key Custody)"]
+    end
+
+    subgraph ExternalEcosystem["Platform Dispatch Targets"]
+        LangfuseCloud["Langfuse / Phoenix (Dev APM)"]
+        MarquezCatalog["Marquez / OpenLineage (Data Governance)"]
+        SIEM["Enterprise SIEM (Datadog / Splunk / Sentinel)"]
+    end
+
+    Agents --> Ingress
+    MCPServers --> Ingress
+    Ingress --> Pod1 & Pod2 & PodN
+    Pod1 & Pod2 & PodN --> RedisStreams
+    RedisStreams --> Worker1 & Worker2 & Worker3
+    
+    Worker1 --> PostgresDB
+    Worker1 --> SovereignHSM
+    Worker2 --> BlobVault
+    Worker3 --> LangfuseCloud
+    Worker3 --> MarquezCatalog
+    Worker3 --> SIEM
 ```
 
-This ensures that whether a user is testing locally on a laptop or running in an enterprise sovereign datacenter, the system introduces **zero financial overhead and zero vendor lock-in**.
+---
+
+### 6.3 Cloud Sovereignty & Multi-Cloud Compatibility
+
+When deployed in the cloud, AgentProvenance satisfies stringent enterprise compliance mandates:
+
+1. **Sovereign Cloud Provider Support**:
+   - 100% deployable on European sovereign clouds (**OVHcloud SecNumCloud**, **Scaleway**, **Hetzner**, **Exoscale**, and **Sovereign Cloud Stack**).
+   - Compatible with sovereign hyperscaler regions (**AWS European Sovereign Cloud**, **Microsoft Cloud for Sovereignty**, **Google Distributed Cloud Hosted**).
+2. **Confidential Computing (Hardware-Encrypted RAM)**:
+   - Trace logs and sensitive multi-agent context are processed inside hardware-isolated memory enclaves (**AMD SEV-SNP**, **Intel TDX**, or **AWS Nitro Enclaves**).
+   - Even cloud infrastructure operators or root admins cannot inspect memory contents during trace analysis.
+3. **Bring / Hold Your Own Key (BYOK / HYOK)**:
+   - Seamless integration with cloud-native key vaults:
+     - AWS KMS / CloudHSM
+     - Google Cloud KMS / Cloud HSM
+     - Azure Key Vault Managed HSM
+     - On-Prem / Sovereign PKCS#11 HSMs (Securosys, Utimaco, YubiHSM)
+4. **Air-Gapped & Disconnected Kubernetes**:
+   - Zero hardcoded external CDN, font, or telemetry dependencies.
+   - Deployable in totally isolated, air-gapped defense or financial Kubernetes clusters via private image registries.
+
+---
+
+### 6.4 Infrastructure as Code (IaC) & Packaging
+
+The repository provides production-grade deployment packaging out of the box:
+
+- **`Dockerfile`**: Multi-stage, distroless minimal container image (<120MB uncompressed).
+- **`docker-compose.yml`**:
+  - `docker compose --profile local up`: Spins up zero-cost local embedded mode (FastAPI + DuckDB + UI).
+  - `docker compose --profile cloud up`: Spins up local cloud-emulation mode (FastAPI + Redis + PostgreSQL + MinIO).
+- **`charts/agent-provenance` (Helm Chart)**:
+  - `values-local.yaml`: Lightweight single-pod deployment with embedded storage.
+  - `values-cloud.yaml`: Multi-pod autoscaling deployment with managed RDS/Postgres, Redis, and S3.
+  - `values-sovereign.yaml`: Pinned to EU sovereign regions with AMD SEV-SNP confidential computing annotations and PKCS#11 HSM integration.
+
