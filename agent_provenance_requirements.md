@@ -175,11 +175,30 @@ Our requirements synthesize key innovations from the frontier projects in this s
 
 ## 4. Non-Functional Requirements (NFR)
 
-### 4.1 Deployment & Footprint (Easily Deployable)
-- **Single-Binary / Docker Compose**:
-  - **Local Mode (Zero Config)**: Single Docker command (`docker compose up`) or standalone CLI running with embedded DuckDB/SQLite + SQLite-VSS, requiring no cloud dependencies.
-  - **Enterprise Cloud Mode**: Distributed Kubernetes Helm chart with Postgres/TimescaleDB/ClickHouse, Redis queue, and S3/GCS blob storage for large payloads.
-- **Client SDKs**: Lightweight, dependency-minimal SDKs in Python and TypeScript/JavaScript.
+### 4.1 Deployment Architecture & Multi-Cloud Footprint
+AgentProvenance employs an **isomorphic architecture**: the exact same core codebase, Pydantic data models, and W3C PROV-O engine operate seamlessly across two distinct operational modes:
+
+#### Mode 1: Local-First ($0-Cost Developer Mode)
+- **Zero Cloud Dependencies**: Runs entirely offline on a developer workstation, edge device, or air-gapped test environment.
+- **Embedded Storage**: In-process DuckDB (or SQLite + WAL) for analytical event queries; in-memory Kùzu / NetworkX for causal DAG traversal.
+- **Local Security & Scrubbing**: In-process Microsoft Presidio (Local Spacy NER) + Regex for PII redaction and delimiter escaping.
+- **Single Container Footprint**: Starts in <2 seconds with `<350 MB RAM` via `docker compose --profile local up`. Total operational cost: **$0.00 / month**.
+
+#### Mode 2: Cloud-Native & Sovereign Cloud Scale
+- **Stateless Microservices & Autoscaling**: Containerized FastAPI ingestion gateway deployed on Kubernetes with Horizontal Pod Autoscaling (HPA) to handle thousands of agent actions per second.
+- **Asynchronous Ingestion Buffer**: Redis Streams, Apache Kafka, or RabbitMQ queue buffer decoupling ingestion from storage persistence.
+- **Distributed Multi-Tier Storage Plane**:
+  - Relational / Time-Series: Managed PostgreSQL (TimescaleDB / Apache AGE) or ClickHouse for petabyte-scale lineage queries.
+  - Blob & Artifact Vault: S3, Google Cloud Storage, or MinIO for encrypted raw payloads, prompt logs, and Parquet data lakes.
+- **Confidential Computing (Hardware-Encrypted RAM)**:
+  - Native deployment inside hardware-attested enclaves (**AMD SEV-SNP**, **Intel TDX**, **AWS Nitro Enclaves**, **OVHcloud SecNumCloud**).
+  - Guarantees memory encryption at runtime so cloud admins or hypervisor processes cannot inspect multi-agent prompts or state in plaintext.
+- **Key Custody & HSM Integration (BYOK / HYOK)**:
+  - Native integration with cloud KMS/HSMs (AWS CloudHSM, Google Cloud HSM, Azure Managed HSM) and sovereign PKCS#11 hardware appliances (Securosys, Utimaco, YubiHSM).
+- **Packaging & Infrastructure as Code (IaC)**:
+  - Multi-stage distroless `Dockerfile` (<120MB).
+  - Production `Helm Chart` (`charts/agent-provenance`) with profiles: `values-local.yaml`, `values-cloud.yaml`, and `values-sovereign.yaml`.
+  - Terraform / OpenTofu deployment modules for AWS, Azure, GCP, and European Sovereign Clouds (OVHcloud, Scaleway, Hetzner).
 
 ### 4.2 Performance & Reliability
 - **Sub-5ms Client Overhead**: All network transmission to the provenance service must be non-blocking, asynchronous, and batch-flushed in worker threads.
@@ -391,5 +410,6 @@ graph TD
 4. **Instruction-Safe Provenance Enveloping**: Delimiter escaping and role isolation guarantee consuming agents never misinterpret historical provenance as active instructions.
 5. **Universal 5-W Layman Summary**: Every single event automatically generates a plain-English 1-liner answering *Who, When, What, With What, and Outcome*.
 6. **Comprehensive Digital Sovereignty**: End-to-end alignment with the European Commission's 9 sovereignty criteria, enabling EU AI Act high-risk conformity and air-gapped deployment.
-7. **Zero-Friction "One Click" Deployability**: Operates as a simple local Docker container or scales seamlessly to enterprise sovereign clouds.
+7. **Platform-Agnostic Meta-Routing**: Single SDK instrumenting multi-agent fleets, dynamically routing to Langfuse, LangSmith, Phoenix, Marquez OpenLineage, Zep, or our local Sovereign Core.
+8. **Isomorphic Dual-Mode Deployment**: The exact same codebase runs local-first with zero infrastructure cost (<350MB RAM on a laptop) and scales horizontally to cloud-native Kubernetes in European Sovereign Clouds with hardware-attested memory encryption (AMD SEV-SNP).
 
