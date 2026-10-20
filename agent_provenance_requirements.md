@@ -1,64 +1,69 @@
-# AgentProvenance: End-to-End Multi-Agent Provenance & Trust Platform
+# AgentProvenance: Platform-Agnostic Multi-Agent Provenance & Intelligent Router
 ## Product Requirements Document & Architecture Blueprint
 
 ---
 
-## 1. Executive Summary & Project Goal
+## 1. Executive Summary & Project Mission
 
 ### 1.1 Primary Project Goal
 The explicit goal of **AgentProvenance** is:
-> **End-to-End (E2E) Agent Provenance for Root Causing Security Issues and Gaps in Digital Sovereignty.**
+> **Platform-Agnostic End-to-End (E2E) Multi-Agent Provenance & Intelligent Routing for Root Causing Security Issues, Digital Sovereignty Compliance, and Zero Vendor Lock-in.**
 
-It provides security engineers, compliance auditors, and AI developers with an immutable, causal audit trail to:
-1. **Root Cause Security Incidents**: Trace back exactly how prompt injections, jailbreaks, poisoned memories, privilege escalations, or rogue tool invocations occurred, what data they touched, and how they propagated across subagent fleets.
-2. **Detect & Resolve Gaps in Digital Sovereignty**: Continuously audit multi-agent architectures against the European Commission's sovereignty criteria (data geofencing, key ownership/HYOK, extraterritorial CLOUD Act exposure, unauthorized foreign API dependencies, unverified model weights/AIBOM, and EU AI Act compliance).
+AgentProvenance acts as the **"OpenTelemetry + LiteLLM for Agent Provenance"**: a universal, vendor-neutral meta-layer that ingests multi-agent telemetry once, evaluates workload preferences and compliance policies, and dynamically routes or dual-dispatches data to the best-fit platform (Langfuse, LangSmith, Arize Phoenix, Marquez OpenLineage, Zep, Datadog, or our local Sovereign Enclave Core). It incorporates an **AI-native LLM Recommender** that proactively identifies the optimal platform for each fleet workload and dynamically shifts telemetry when security taint or sovereign data is detected.
 
-### 1.2 The Challenge in Modern Multi-Agent Fleets
-Modern AI architectures are shifting from single monolithic prompts to **collaborative multi-agent fleets** (hierarchical planner-worker, choreographies, swarms, peer-to-peer MCP networks). In these systems:
-- Subagents delegate tasks across complex non-deterministic graphs.
-- Knowledge evolves dynamically in temporal agent memories and vector stores.
-- Agents read, mutate, and generate external artifacts (files, code, database records, API payloads).
-- Decisions cascade: a prompt injection or poisoned context in Agent A can silently corrupt Agent D's downstream financial, clinical, or infrastructure actions.
-- Cross-border data leakage and foreign dependency chains occur silently during autonomous agent tool execution without human visibility.
+### 1.2 The Problem Statement: The Multi-Agent Observability & Sovereignty Dilemma
+Modern AI fleets (LangGraph, CrewAI, AutoGen, AGY, MCP networks) create severe operational and architectural friction:
 
-Traditional observability tools (LangSmith, Langfuse, Phoenix) focus primarily on **performance/tracing** (latency, token costs, call trees) rather than **causal provenance, security root cause analysis (RCA), verifiable attestations, and compliance-grade digital sovereignty auditability**.
+1. **Tool Fragmentation & Vendor Lock-in**:
+   - Developers are trapped in silos: APM tools (Langfuse/Phoenix) excel at latency and token costs but lack causal memory lineage; data tools (OpenLineage) track SQL mutations but ignore agent thoughts; memory stores (Zep) model facts but omit fleet-level security policies.
+   - Migrating between platforms requires rewriting SDK decorators and instrumentations across thousands of agent prompts.
+2. **The "Developer Speed vs. Digital Sovereignty" Clash**:
+   - AI engineers gravitate toward developer-friendly cloud SaaS dashboards (e.g., Langfuse Cloud, LangSmith), unintentionally exfiltrating proprietary prompts, customer PII, and company secrets to foreign cloud regions in violation of **GDPR, SecNumCloud, and EU AI Act Articles 12–14**.
+3. **Security Blind Spots & Blast Radius Invisibility**:
+   - Traditional APM spans show *how long* a call took, but cannot answer critical security questions: *Where did this prompt injection originate? Which downstream agents read the poisoned context? What vector memory facts were corrupted? What files or databases were mutated?*
+4. **Agent Instruction Confusion**:
+   - Autonomous agents querying their own history via APIs/tools risk executing past un-sanitized logs or malicious user prompts as active directives, resulting in recursive jailbreaks.
 
-### 1.3 The Solution & Core Value Proposition
-**AgentProvenance** is a lightweight, API-driven, open-standard platform designed to capture, govern, verify, and query the complete causal history of multi-agent systems. It models **who did what, when, why, based on which facts/tools, under what policies/jurisdictions, and what artifacts were produced or altered**, ensuring total security forensic readiness and sovereign regulatory compliance.
+### 1.3 Target Users & Personas
+
+| Persona | Primary Needs & Pain Points | How AgentProvenance Solves It |
+| :--- | :--- | :--- |
+| **1. Security & Incident Response Engineers** | Triage prompt injections, memory poisoning, privilege escalation, and map attack blast radiuses. | Real-time Causal DAG with red taint highlighting, blast radius scoping, and 1-click memory quarantine controls. |
+| **2. Digital Sovereignty & Compliance Officers (DPO/CISO)** | Enforce EC 9 sovereignty pillars, prevent CLOUD Act exposure, and generate EU AI Act Annex IV documentation. | Automatic EU data geofencing, zero-knowledge Merkle proofs, AMD SEV-SNP enclaves, and 1-click conformity PDF generation. |
+| **3. AI Fleet Architects & Developers** | Single instrumented SDK without vendor lock-in; low-cost token & latency debugging. | Write once via `@track_agent`; automated platform recommendation; seamless dispatch to Langfuse, Phoenix, or LangSmith. |
+| **4. Business & Layman Decision-Makers** | Need to understand what autonomous agents did without decoding raw graph JSON or stack traces. | Universal 5-W Layman Summary on every event answering *Who, When, What, With What, and Outcome*. |
+| **5. Autonomous AI Agents (via MCP)** | Inspect historical evidence and fact provenance mid-turn without being prompt-injected by past logs. | Strict Instruction-Safe Data Envelopes (`<provenance_data is_executable="false">`) and MCP inspection tools. |
+
+### 1.4 The Solution: The Universal Meta-Broker & Intelligent Router
 
 ```mermaid
-graph LR
-    subgraph MultiAgentSystem["Multi-Agent Runtime (LangGraph, CrewAI, AutoGen, AGY, Custom)"]
-        Planner["Planner Agent"]
-        Worker1["Research Agent"]
-        Worker2["Coding Agent"]
-        Memory["Agent Memory / RAG"]
+graph TD
+    subgraph ClientFleet["Multi-Agent Fleet (LangGraph, CrewAI, AutoGen, AGY, Custom)"]
+        FleetAgents["Autonomous Agent Fleet"]
+        SingleSDK["AgentProvenance Universal SDK (@track_agent, OTel, MCP)"]
     end
 
-    subgraph AgentProvenance["AgentProvenance Engine"]
-        Ingestion["Async Ingest Gateway (REST / gRPC / OTel / MCP)"]
-        Guard["Smart Policy & Scrubbing Engine"]
-        GraphCore["W3C PROV Temporal Graph Engine"]
-        Attest["Tamper-Evident Attestation Ledger"]
-        QueryEngine["Lineage & Causal Query Engine"]
+    subgraph MetaBroker["AgentProvenance Broker & Decision Engine"]
+        IngestGateway["Canonical Ingest Gateway (Pydantic v2 Schema)"]
+        LLMRecommender["AI Policy & Platform Recommender"]
+        Dispatcher["Multi-Platform Dispatcher & Adapter Hub"]
     end
 
-    subgraph Consumption["Consumption & Action"]
-        WebUI["Lineage Graph & Replay UI"]
-        MCPAgent["MCP Server (Lineage for Agents)"]
-        AuditAPI["Compliance & Audit Export (EU AI Act, SOC2)"]
+    subgraph TargetBackends["Target Ecosystem & Specialized Engines"]
+        P_Langfuse["Langfuse / Phoenix<br>Best for: Low-cost APM & Token Profiling"]
+        P_LangSmith["LangSmith<br>Best for: LangGraph State Machine Deltas"]
+        P_OpenLineage["Marquez / OpenLineage<br>Best for: Column & Dataset Mutations"]
+        P_Zep["Zep AI / Graffiti<br>Best for: Temporal Fact & Memory Evolution"]
+        P_Sovereign["AgentProvenance Sovereign Core<br>Best for: EU AI Act, Security RCA, Post-Quantum Merkle"]
     end
 
-    Planner --> Ingestion
-    Worker1 --> Ingestion
-    Worker2 --> Ingestion
-    Memory --> Ingestion
-
-    Ingestion --> Guard --> GraphCore --> Attest
-    GraphCore --> QueryEngine
-    QueryEngine --> WebUI
-    QueryEngine --> MCPAgent
-    QueryEngine --> AuditAPI
+    FleetAgents --> SingleSDK --> IngestGateway
+    IngestGateway --> LLMRecommender --> Dispatcher
+    Dispatcher -->|Dev APM Spans| P_Langfuse
+    Dispatcher -->|State Graphs| P_LangSmith
+    Dispatcher -->|Data Mutations| P_OpenLineage
+    Dispatcher -->|Memory Facts| P_Zep
+    Dispatcher -->|Sovereignty & Security RCA| P_Sovereign
 ```
 
 ---
@@ -152,6 +157,19 @@ Our requirements synthesize key innovations from the frontier projects in this s
   - **Outcome / Result**: Final artifact, decision, or error, accompanied by confidence/uncertainty.
   - *Standard Template*: `"[WHO] at [WHEN] did [WHAT] using [SOURCES/TOOLS] resulting in [OUTCOME] (Confidence: [X]%)."`
 - **FR 9.2 First-Line Display Guarantee**: Every Web UI card, CLI view, notification, and MCP response must present this `layman_summary` as the primary header, enabling non-technical stakeholders and auditors to comprehend system activity without parsing JSON traces.
+
+#### FR 10: Platform-Agnostic Meta-Router & Intelligent LLM Recommender Engine
+- **FR 10.1 Universal Ingestion & Adapter Hub**: Provide a vendor-neutral ingestion layer that translates the canonical W3C PROV record into the native formats of external platforms via pluggable exporters:
+  - `LangfuseExporter` & `PhoenixExporter`: Converts spans, tokens, and latencies for developer APM profiling.
+  - `LangSmithExporter`: Converts execution graphs and state machine deltas for LangGraph fleets.
+  - `OpenLineageExporter`: Maps dataset and column mutations for data governance tools (Marquez, Atlan, Collibra).
+  - `ZepExporter`: Maps temporal entity-fact graphs into agent memory stores.
+  - `SovereignEnclaveExporter`: Persists zero-knowledge Merkle trees and cryptographic post-quantum signatures in local/EU sovereign enclaves.
+- **FR 10.2 Preference & Policy-Driven Decision Matrix**: Evaluate user-defined constraints (`provenance_config.yaml`) including jurisdiction (EU/EEA, US, Global), regulatory tier (EU AI Act High-Risk, HIPAA, GDPR), budget tier, and framework to automatically assign the optimal backend.
+- **FR 10.3 AI-Native LLM Recommender & Advisor**:
+  - Automatically analyze fleet workloads and configurations during onboarding, generating an actionable recommendation report with clear rationale.
+  - Dynamic Runtime Re-Routing: Continuously inspect telemetry. If an agent enters a high-risk mode (e.g., handles personal financial data or suffers a prompt injection), the engine dynamically shifts provenance logs from a public APM to the Sovereign Enclave Core while notifying operators.
+- **FR 10.4 Dual-Dispatch & Telemetry Federation**: Support concurrent dual-routing, enabling teams to stream anonymized performance metrics to lightweight SaaS tools (Langfuse/Phoenix) while simultaneously archiving full immutable audit trails in the Sovereign Core for compliance.
 
 ---
 
