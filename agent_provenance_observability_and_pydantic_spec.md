@@ -157,19 +157,56 @@ class SafeEnvelope(BaseModel):
 
 
 # ==============================================================================
-# 2. Universal 5-W Layman Summary
+# 2. Universal 5-W Layman Summary & Problem Identification
 # ==============================================================================
+
+class ProblemStatusType(str, Enum):
+    NORMAL = "NORMAL_NO_PROBLEMS_IDENTIFIED"
+    PROBLEM_IDENTIFIED = "PROBLEM_IDENTIFIED"
+
+
+class ProblemCategory(str, Enum):
+    NONE = "NONE"
+    SECURITY_INJECTION = "SECURITY_INJECTION"
+    SOVEREIGNTY_LEAK = "SOVEREIGNTY_LEAK"
+    POLICY_VIOLATION = "POLICY_VIOLATION"
+    UNAUTHORIZED_TOOL = "UNAUTHORIZED_TOOL"
+    DATA_CORRUPTION = "DATA_CORRUPTION"
+    HIGH_UNCERTAINTY = "HIGH_UNCERTAINTY"
+
 
 class LaymanSummary(BaseModel):
     """
-    Human-scannable 1-line plain-English summary answering the 5 W's.
-    Guaranteed on every API and UI response.
+    Human-scannable plain-English summary answering the 5 W's,
+    with an explicit declaration of whether a problem/risk was identified.
+    Guaranteed on every API, UI, and live stream response.
     """
     summary_line: str = Field(
         ...,
         example="Market Analyst Agent at 22:20 UTC analyzed SEC Filing 2026 Q3 using PDF Parser resulting in Summary Table CSV (Confidence: 96%).",
         description="Standardized plain-English 1-liner: [WHO] at [WHEN] did [WHAT] using [SOURCES] resulting in [OUTCOME] (Confidence: [X]%)."
     )
+
+    # Explicit Problem Identification
+    is_problem_identified: bool = Field(
+        default=False,
+        description="Explicit flag for humans and auditors: True if any security, policy, or sovereignty problem occurred."
+    )
+    problem_status: ProblemStatusType = Field(
+        default=ProblemStatusType.NORMAL,
+        description="Unambiguous status: NORMAL_NO_PROBLEMS_IDENTIFIED vs PROBLEM_IDENTIFIED."
+    )
+    problem_category: ProblemCategory = Field(
+        default=ProblemCategory.NONE,
+        description="Taxonomy of the detected issue."
+    )
+    problem_description: Optional[str] = Field(
+        default=None,
+        example="Indirect prompt injection detected in web scraper output; downstream execution quarantined.",
+        description="Plain-English explanation of the problem identified and remediation taken."
+    )
+
+    # 5-W Fields
     who: str = Field(..., description="Acting agent name, role, or user identity.")
     when: datetime = Field(..., description="UTC timestamp of the action.")
     what: str = Field(..., description="Action taken in plain non-technical language.")

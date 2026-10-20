@@ -157,6 +157,10 @@ Our requirements synthesize key innovations from the frontier projects in this s
   - **Outcome / Result**: Final artifact, decision, or error, accompanied by confidence/uncertainty.
   - *Standard Template*: `"[WHO] at [WHEN] did [WHAT] using [SOURCES/TOOLS] resulting in [OUTCOME] (Confidence: [X]%)."`
 - **FR 9.2 First-Line Display Guarantee**: Every Web UI card, CLI view, notification, and MCP response must present this `layman_summary` as the primary header, enabling non-technical stakeholders and auditors to comprehend system activity without parsing JSON traces.
+- **FR 9.3 Explicit Problem Identification & Risk Status**: Every human-readable summary must unambiguously declare whether a problem, risk, or policy breach was detected:
+  - **Status Header**: Clearly display `STATUS: NORMAL (No Problems Identified)` or `STATUS: PROBLEM IDENTIFIED 🚨 (<Category>)`.
+  - **Problem Categories**: `SECURITY_INJECTION`, `SOVEREIGNTY_LEAK`, `POLICY_VIOLATION`, `UNAUTHORISED_TOOL`, `DATA_CORRUPTION`, `HIGH_UNCERTAINTY`.
+  - **Plain-English Impact**: If a problem is identified, provide a non-technical 1-sentence explanation of what failed and what defensive action (e.g., quarantine, block, reroute) was taken.
 
 #### FR 10: Platform-Agnostic Meta-Router & Intelligent LLM Recommender Engine
 - **FR 10.1 Universal Ingestion & Adapter Hub**: Provide a vendor-neutral ingestion layer that translates the canonical W3C PROV record into the native formats of external platforms via pluggable exporters:
